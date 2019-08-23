@@ -37,7 +37,8 @@ class CatalogItem(Base):
     id = Column(Integer, primary_key=True)
     description = Column(String(250))
     cat_id = Column(Integer, ForeignKey('category.id'))
-    category = relationship(Category)
+    category = relationship(
+                   Category, backref="CatalogItem")
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 

@@ -1,0 +1,65 @@
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container">
+    <div class="navbar-header">
+      <h1><a  href="{{ url_for('showCatalog') }}"><span class="text-light">Catalog</span></a></h1>
+    </div>
+    <form class="form-inline">
+        {%if 'username' not in session %}
+          <a class="btn bg-danger my-2 my-sm-0" id="loginButton">Login</a>
+        {% else %}
+          {% if session.user_id %}
+                <a class="btn bg-danger my-2 my-sm-0" id="loginButton" onclick="signOut();">Logout: {{ session['email']}} </a>
+          {% endif %}
+        {% endif %}
+    </form>  
+  </div>
+</nav>
+<script src="https://apis.google.com/js/platform.js?onload=start"></script>
+<script>
+  $('#loginButton').click(function() {
+    auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
+  });
+</script>
+<script>
+function signInCallback(json) {
+  console.log('inside callback fuction');
+  console.log(json);
+  // authResult = JSON.parse(json);
+  authResult = json;
+  if (authResult['code']) {
+    // Hide the sign-in button now that the user is authorized, for example:
+    $('#loginButton').text('Logout');
+    // Send the code to the server
+    $.ajax({
+      type: 'POST',
+      url: '/oauth/google',
+      processData: false,
+      data: authResult['code'],
+      contentType: 'application/octet-stream; charset=utf-8',
+      success: function(result) {
+        // Handle or verify the server response if necessary.
+        console.log(result)
+      }
+    }); 
+  }
+}
+</script>
+<script>
+    var auth2;
+    gapi.load('auth2', function() {
+        auth2 = gapi.auth2.init();
+    });
+    function onSignIn() {
+        var profile = auth2.currentUser.get().getBasicProfile();
+        console.log('User logged in.');
+        console.log('ID:', profile.getId());
+        console.log('Name:', profile.getName());
+        console.log('Image URL:', profile.getImageUrl());
+        console.log('Email:', profile.getEmail());
+    } 
+    function signOut() {
+        auth2.signOut().then(function() {
+            console.log('User signed out.');
+        });
+    }
+</script>
